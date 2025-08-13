@@ -290,7 +290,7 @@ export default function Page() {
                   <div
                     className={
                       selectedMission.milestonesDetail.length > 3
-                        ? "max-h-64 overflow-y-auto" // scroll kalau lebih dari 3 item
+                        ? "max-h-[46vh] overflow-y-auto pr-1"
                         : ""
                     }
                   >
