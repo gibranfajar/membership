@@ -18,6 +18,7 @@ import categoryPromoReducer from "./slices/categoryPromoSlice";
 import tierInfoSementara from "./slices/tierInfoSementara";
 import contact from "./slices/contactSlice";
 import faqReducer from "./slices/faqSlice";
+import missionReducer from "./slices/missionSlice";
 
 const store = configureStore({
   reducer: {
@@ -40,6 +41,7 @@ const store = configureStore({
     tierInfoSementara: tierInfoSementara,
     contact: contact,
     faq: faqReducer,
+    mission: missionReducer,
   },
   devTools: process.env.NEXT_PUBLIC_NODE_ENV !== "production",
 });

@@ -92,7 +92,11 @@ export default function Vouchers() {
               <div className="flex justify-between items-start">
                 <div className="flex flex-col">
                   <span className="text-sm">
-                    {item.category == "VCR" ? "Voucher" : "Voucher Special"}
+                    {item.category == "VCR"
+                      ? "Voucher"
+                      : item.category == "MISSION"
+                      ? "Voucher Misi"
+                      : "Voucher Spesial"}
                     <span className="px-1 normal-case">
                       {item.type === "CASHBACK" ? "Cashback" : " "}
                     </span>
