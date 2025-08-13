@@ -47,15 +47,22 @@ type Milestone = {
 export default function Page() {
   const dispatch = useAppDispatch();
   const { error, data } = useSelector((state: RootState) => state.mission);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
+  const [successMessageClaim, setSuccessMessageClaim] = useState(false);
+  const [successMessageJoin, setSuccessMessageJoin] = useState(false);
 
   useEffect(() => {
     dispatch(getMission());
   }, [dispatch]);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
-  const [successMessageClaim, setSuccessMessageClaim] = useState(false);
-  const [successMessageJoin, setSuccessMessageJoin] = useState(false);
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [isModalOpen]);
 
   const handleOpenModal = (
     mission: (Mission & { milestonesDetail: Milestone[] }) | null
@@ -162,7 +169,7 @@ export default function Page() {
   return (
     <div className="flex justify-center items-center">
       <div className="flex flex-col items-center w-full max-w-md bg-white md:rounded-lg min-h-screen">
-        <div className="bg-base-accent w-full min-h-screen">
+        <div className="bg-base-accent w-full min-h-screen pb-8">
           <Header>
             {successMessageJoin && (
               <div className="absolute top-0 left-0 right-0 z-50">
@@ -280,66 +287,75 @@ export default function Page() {
                   {selectedMission.description}
                 </p>
                 <div className="space-y-3">
-                  {selectedMission.milestonesDetail.map(
-                    (milestone: Milestone) => (
-                      <div
-                        key={milestone.idMil}
-                        className="border border-gray-200 p-3 rounded-lg bg-gray-50 fontMon flex justify-between items-center"
-                      >
-                        <div>
-                          <h3 className="text-sm font-semibold">
-                            {milestone.milDesc}
-                          </h3>
-                          <p className="text-xs">
-                            Target: {formatToIDR(milestone.milValue)}
-                          </p>
-                          <p className="text-xs">
-                            Tercapai: {formatToIDR(milestone.milCurrentValue)}
-                          </p>
-                          <p className="text-xs">
-                            Status: {milestone.milClaimStatus}
-                          </p>
-                          <p className="text-xs">
-                            Reward: {milestone.milReward}
-                          </p>
-                          {milestone.milPassDate && (
-                            <>
-                              <p className="text-[10px] text-green-600">
-                                Selesai: {formatDate(milestone.milPassDate)}
-                              </p>
-                              {milestone.milClaimDate != "" && (
-                                <p className="text-red-600 text-[10px]">
-                                  Klaim:{" "}
-                                  {formatDate(milestone.milClaimDate || "")}
+                  <div
+                    className={
+                      selectedMission.milestonesDetail.length > 3
+                        ? "max-h-64 overflow-y-auto" // scroll kalau lebih dari 3 item
+                        : ""
+                    }
+                  >
+                    {selectedMission.milestonesDetail.map(
+                      (milestone: Milestone) => (
+                        <div
+                          key={milestone.idMil}
+                          className="border border-gray-200 p-3 rounded-lg bg-gray-50 fontMon flex justify-between items-center mb-2"
+                        >
+                          <div>
+                            <h3 className="text-sm font-semibold">
+                              {milestone.milDesc}
+                            </h3>
+                            <p className="text-xs">
+                              Target: {formatToIDR(milestone.milValue)}
+                            </p>
+                            <p className="text-xs">
+                              Tercapai: {formatToIDR(milestone.milCurrentValue)}
+                            </p>
+                            <p className="text-xs">
+                              Status: {milestone.milClaimStatus}
+                            </p>
+                            <p className="text-xs">
+                              Reward: {milestone.milReward}
+                            </p>
+                            {milestone.milPassDate && (
+                              <>
+                                <p className="text-[10px] text-green-600">
+                                  Selesai: {formatDate(milestone.milPassDate)}
                                 </p>
-                              )}
-                            </>
+                                {milestone.milClaimDate !== "" && (
+                                  <p className="text-red-600 text-[10px]">
+                                    Klaim:{" "}
+                                    {formatDate(milestone.milClaimDate || "")}
+                                  </p>
+                                )}
+                              </>
+                            )}
+                          </div>
+
+                          {/* button klaim */}
+                          {milestone.milClaimDate === "" ? (
+                            <button
+                              className={`bg-base-accent text-white text-xs rounded-md py-1 px-4 ${
+                                milestone.milClaimStatus === "progress"
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              disabled={milestone.milClaimStatus === "progress"}
+                              onClick={() => handleClaimMilestone(milestone)}
+                            >
+                              Klaim
+                            </button>
+                          ) : (
+                            <Link
+                              href={"/voucher"}
+                              className="bg-base-accent text-white text-xs rounded-md py-1 px-4"
+                            >
+                              Lihat Voucher
+                            </Link>
                           )}
                         </div>
-                        {/* button klaim */}
-                        {milestone.milClaimDate === "" ? (
-                          <button
-                            className={`bg-base-accent text-white text-xs rounded-md py-1 px-4 ${
-                              milestone.milClaimStatus === "progress"
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                            disabled={milestone.milClaimStatus === "progress"}
-                            onClick={() => handleClaimMilestone(milestone)}
-                          >
-                            Klaim
-                          </button>
-                        ) : (
-                          <Link
-                            href={"/voucher"}
-                            className="bg-base-accent text-white text-xs rounded-md py-1 px-4"
-                          >
-                            Lihat Voucher
-                          </Link>
-                        )}
-                      </div>
-                    )
-                  )}
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
