@@ -248,7 +248,9 @@ export default function Page() {
                           )}
 
                           <span className="text-[10px] fontMon text-center tracking-wider opacity-50">
-                            Berakhir pada {mission.endDate}
+                            {new Date(mission.endDate) > new Date()
+                              ? `Berakhir pada ${formatDate(mission.endDate)}`
+                              : "Misi telah berakhir"}
                           </span>
                         </div>
                       </div>
@@ -290,7 +292,7 @@ export default function Page() {
                   <div
                     className={
                       selectedMission.milestonesDetail.length > 3
-                        ? "max-h-[46vh] overflow-y-auto pr-1"
+                        ? "max-h-[46vh] overflow-y-auto pr-1" // 46% tinggi layar
                         : ""
                     }
                   >
