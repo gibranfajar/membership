@@ -51,6 +51,7 @@ export default function Page() {
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [successMessageClaim, setSuccessMessageClaim] = useState(false);
   const [successMessageJoin, setSuccessMessageJoin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getMission());
@@ -78,6 +79,7 @@ export default function Page() {
 
   // handle join mission
   const handleJoinMission = async (missionId: number) => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -105,11 +107,14 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Error joining mission:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Handle milestone claim
   const handleClaimMilestone = async (milestone: Milestone) => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
@@ -141,6 +146,8 @@ export default function Page() {
       }
     } catch (error) {
       console.error("Error claiming milestone:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -243,6 +250,7 @@ export default function Page() {
                                 label="JOIN"
                                 className="bg-base-accent text-white"
                                 onClick={() => handleJoinMission(mission.id)}
+                                disabled={isLoading}
                               />
                             </div>
                           )}
@@ -335,17 +343,19 @@ export default function Page() {
 
                           {/* button klaim */}
                           {milestone.milClaimDate === "" ? (
-                            <button
-                              className={`bg-base-accent text-white text-xs rounded-md py-1 px-4 ${
-                                milestone.milClaimStatus === "progress"
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }`}
-                              disabled={milestone.milClaimStatus === "progress"}
-                              onClick={() => handleClaimMilestone(milestone)}
-                            >
-                              Klaim
-                            </button>
+                            <>
+                              {milestone.milClaimStatus == "complete" && (
+                                <button
+                                  className={`bg-base-accent text-white text-xs rounded-md py-1 px-4`}
+                                  onClick={() =>
+                                    handleClaimMilestone(milestone)
+                                  }
+                                  disabled={isLoading}
+                                >
+                                  Klaim
+                                </button>
+                              )}
+                            </>
                           ) : (
                             <Link
                               href={"/voucher"}
