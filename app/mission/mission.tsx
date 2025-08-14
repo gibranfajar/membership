@@ -8,11 +8,11 @@ import { useSelector } from "react-redux";
 import { getMission } from "@/redux/thunks/missionThunks";
 import { RootState } from "@/redux/store";
 import formatToIDR from "@/utils/formatToIDR";
-import formatDate from "@/utils/formatDate";
 import { FadeLoader } from "react-spinners";
 import axios from "axios";
 import SuccessMessage from "@/components/SuccessMessage";
 import { useRouter } from "next/navigation";
+import { formatDate, parseIndoDate } from "@/utils/formatMission";
 
 type Mission = {
   id: number;
@@ -173,6 +173,10 @@ export default function Mission({
     return <div>Error: {error}</div>;
   }
 
+  const endDate = parseIndoDate(selectedMission?.endDate || "");
+  const claimDeadline = new Date(endDate);
+  claimDeadline.setMonth(claimDeadline.getMonth() + 1);
+
   return (
     <>
       {data?.missionsData
@@ -307,15 +311,31 @@ export default function Mission({
                         <p className="text-xs">Reward: {milestone.milReward}</p>
                         {milestone.milPassDate && (
                           <>
+                            {/* Tanggal selesai */}
                             <p className="text-[10px] text-green-600">
                               Selesai: {formatDate(milestone.milPassDate)}
                             </p>
+
+                            {/* Tanggal klaim */}
                             {milestone.milClaimDate !== "" && (
                               <p className="text-red-600 text-[10px]">
                                 Klaim:{" "}
                                 {formatDate(milestone.milClaimDate || "")}
                               </p>
                             )}
+                            {/* Status klaim */}
+                            {milestone.milClaimDate === "" ? (
+                              new Date() > claimDeadline ? (
+                                <p className="text-[10px] text-red-600">
+                                  Masa waktu klaim habis (batas{" "}
+                                  {formatDate(claimDeadline)})
+                                </p>
+                              ) : (
+                                <p className="text-[10px] text-red-600">
+                                  Max klaim sampai {formatDate(claimDeadline)}
+                                </p>
+                              )
+                            ) : null}
                           </>
                         )}
                       </div>

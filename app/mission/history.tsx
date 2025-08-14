@@ -7,11 +7,11 @@ import { useSelector } from "react-redux";
 import { getMission } from "@/redux/thunks/missionThunks";
 import { RootState } from "@/redux/store";
 import formatToIDR from "@/utils/formatToIDR";
-import formatDate from "@/utils/formatDate";
 import { FadeLoader } from "react-spinners";
 import axios from "axios";
 import SuccessMessage from "@/components/SuccessMessage";
 import { useRouter } from "next/navigation";
+import { formatDate, parseIndoDate } from "@/utils/formatMission";
 
 type Mission = {
   id: number;
@@ -133,30 +133,6 @@ export default function Page() {
   if (error) {
     return <div>Error: {error}</div>;
   }
-
-  const parseIndoDate = (dateStr: string) => {
-    const months: { [key: string]: number } = {
-      Januari: 0,
-      Februari: 1,
-      Maret: 2,
-      April: 3,
-      Mei: 4,
-      Juni: 5,
-      Juli: 6,
-      Agustus: 7,
-      September: 8,
-      Oktober: 9,
-      November: 10,
-      Desember: 11,
-    };
-
-    const [day, monthName, year] = dateStr.split(" ");
-    return new Date(
-      parseInt(year),
-      months[monthName as keyof typeof months],
-      parseInt(day)
-    );
-  };
 
   const endDate = parseIndoDate(selectedMission?.endDate || "");
   const claimDeadline = new Date(endDate);
@@ -285,21 +261,31 @@ export default function Page() {
                         <p className="text-xs">Reward: {milestone.milReward}</p>
                         {milestone.milPassDate && (
                           <>
+                            {/* Tanggal selesai */}
                             <p className="text-[10px] text-green-600">
                               Selesai: {formatDate(milestone.milPassDate)}
                             </p>
+
+                            {/* Tanggal klaim */}
                             {milestone.milClaimDate !== "" && (
                               <p className="text-red-600 text-[10px]">
                                 Klaim:{" "}
                                 {formatDate(milestone.milClaimDate || "")}
                               </p>
                             )}
-                            {milestone.milClaimDate === "" &&
-                              new Date() > claimDeadline && (
+                            {/* Status klaim */}
+                            {milestone.milClaimDate === "" ? (
+                              new Date() > claimDeadline ? (
                                 <p className="text-[10px] text-red-600">
-                                  Masa waktu klaim habis
+                                  Masa waktu klaim habis (batas{" "}
+                                  {formatDate(claimDeadline)})
                                 </p>
-                              )}
+                              ) : (
+                                <p className="text-[10px] text-red-600">
+                                  Max klaim sampai {formatDate(claimDeadline)}
+                                </p>
+                              )
+                            ) : null}
                           </>
                         )}
                       </div>
