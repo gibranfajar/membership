@@ -15,6 +15,7 @@ import formatDate from "@/utils/formatDate";
 import { FadeLoader } from "react-spinners";
 import axios from "axios";
 import SuccessMessage from "@/components/SuccessMessage";
+import { useRouter } from "next/navigation";
 
 type Mission = {
   id: number;
@@ -45,8 +46,11 @@ type Milestone = {
 };
 
 export default function Page() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
-  const { error, data } = useSelector((state: RootState) => state.mission);
+  const { error, data, loading } = useSelector(
+    (state: RootState) => state.mission
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [successMessageClaim, setSuccessMessageClaim] = useState(false);
@@ -54,8 +58,14 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    dispatch(getMission());
-  }, [dispatch]);
+    const member = localStorage.getItem("member");
+    const token = localStorage.getItem("token");
+    if (!member || !token) {
+      router.replace("/"); // Redirect ke halaman login
+    } else if (!data || data.missionsData.length === 0) {
+      dispatch(getMission());
+    }
+  }, [dispatch, router, data]);
 
   useEffect(() => {
     if (isModalOpen) {
@@ -151,16 +161,7 @@ export default function Page() {
     }
   };
 
-  if (data == null) {
-    return (
-      <div className="flex flex-col gap-4 justify-center items-center h-screen">
-        <Image src="/images/logo.svg" width={150} height={150} alt="logo" />
-        <FadeLoader color="#101E2B" width={5} />
-      </div>
-    );
-  }
-
-  if (data == null) {
+  if (loading) {
     return (
       <div className="flex flex-col gap-4 justify-center items-center h-screen">
         <Image src="/images/logo.svg" width={150} height={150} alt="logo" />
@@ -211,7 +212,7 @@ export default function Page() {
                         <div className="flex flex-col">
                           <div className="mb-4">
                             <span className="text-[10px] fontMon mb-4 text-amber-800 tracking-wider rounded-md bg-amber-50 p-2 border border-amber-200">
-                              {mission.brand}
+                              {mission.brand.toUpperCase()}
                             </span>
                           </div>
 
@@ -257,7 +258,7 @@ export default function Page() {
 
                           <span className="text-[10px] fontMon text-center tracking-wider opacity-50">
                             {new Date(mission.endDate) > new Date()
-                              ? `Berakhir pada ${formatDate(mission.endDate)}`
+                              ? `Berakhir pada ${mission.endDate}`
                               : "Misi telah berakhir"}
                           </span>
                         </div>
